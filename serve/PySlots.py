@@ -38,6 +38,8 @@ class PySlots(object):
                 self.fileMan.UpdateConfigFile('mail',serverInput,usernameInput,passwordInput,website,alias)
                 # self.ui.stackWgt.setCurrentIndex(1)
                 self.timerRoutine.toastLabel('Email Account Login Success.',3000)
+                self.timerRoutine.accBatchLogout()
+                self.timerRoutine.accBatchLogin()
                 self.loginDialog.close()
                 self.listDialog.show()
 

@@ -158,8 +158,9 @@ class TanslucentDialog(QWidget):
             QMouseEvent.accept()
         elif Qt.LeftButton and self._bottom_drag:
             # 下侧调整窗口高度
-            self.resize(self.width(), QMouseEvent.pos().y())
-            QMouseEvent.accept()
+            if(QMouseEvent.pos().y()>400): #限制400
+                self.resize(self.width(), QMouseEvent.pos().y())
+                QMouseEvent.accept()
         elif Qt.LeftButton and self._corner_drag:
             # 右下角同时调整高度和宽度
             self.resize(QMouseEvent.pos().x(), QMouseEvent.pos().y())

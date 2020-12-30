@@ -37,8 +37,26 @@ def main():
     :main function, the entry of entire app
     :return: None
     """
-    
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication(sys.argv)
+
+    primaryScreen = QApplication.primaryScreen()
+    # screens = QApplication.screens()
+    # for screen in screens:
+    #     if not screen is primaryScreen:
+    #         auxiliaryScreen = screen
+    #         break
+    #     else:
+    #         auxiliaryScreen = None
+    scrHei = primaryScreen.geometry().height()
+    lineHei = int(scrHei/40)
+    spaceHei = int(scrHei/180)
+    viewSpacHei = int(scrHei/540)
+    # print(auxiliaryScreen.geometry())
+
+    dpi = int(primaryScreen.logicalDotsPerInch())
+    # print(dpi)
+
 
     # 设置全局字体
     #font = glob.glob('./gui/DroidSansChinese.ttf')
@@ -47,7 +65,6 @@ def main():
     QtGui.QFontDatabase.addApplicationFont('./gui/DroidSansChinese.ttf')
     font = QtGui.QFont('PingFang SC Regular',11) #Microsoft YaHei
     app.setFont(font)
-    
 
     # Create a QDialog object
     listDialog = TanslucentDialog()
@@ -59,7 +76,7 @@ def main():
     addAgendaDialog.setWindowFlags(addAgendaDialog.windowFlags() | Qt.WindowMinimizeButtonHint | Qt.WindowStaysOnTopHint)
     addAgendaDialog.setWindowTitle('Add Agenda...')
     # Create a UI object
-    ui_inlook = Ui_InLook()
+    ui_inlook = Ui_InLook(lineHei,spaceHei)
     ui_loginpage = Ui_LoginPage()
     ui_addAgenda = Ui_AddAgenda()
 
@@ -85,18 +102,16 @@ def main():
 
     
 
-    ui_inlook.unrdListView.setSpacing(2)
-    ui_inlook.agndListView.setSpacing(2)
+    ui_inlook.unrdListView.setSpacing(viewSpacHei)
+    ui_inlook.agndListView.setSpacing(viewSpacHei)
     # ui.statusLabel.setAlignment(Qt.AlignCenter)
     # curDir=os.path.dirname(os.path.abspath(__file__))
     
 
-
-
     fileMan = PyFileMan()
     unrdModel=UnrdListModel()
     exchModel = ExchListModel()
-    timerRoutine = PyTimerRoutine(unrdModel,exchModel,listDialog,ui_inlook)
+    timerRoutine = PyTimerRoutine(unrdModel,exchModel,listDialog,ui_inlook,lineHei,spaceHei,viewSpacHei,dpi)
     listDialog.setRoutineAndConfigFile(timerRoutine,fileMan)
 
 
@@ -133,7 +148,8 @@ def main():
         # ui.stackWgt.setCurrentIndex(1)
         listDialog.show()
         listDialog.selfFlush()
-        timerRoutine.unrdAutoUpdate()
+        timerRoutine.accBatchLogin()
+        
     else:
         loginDialog.show()
         ui_loginpage.lgnPgCancelButton.setText('Reset')
