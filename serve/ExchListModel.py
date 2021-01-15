@@ -20,6 +20,8 @@ class ExchListModel(QAbstractListModel):
         self.alias=[]
         self.websiteList = []
 
+        self.toolTipText = 'click to open exchange account'
+
     def rowCount(self, parent=QModelIndex()):
         """
         return number of items.
@@ -47,8 +49,11 @@ class ExchListModel(QAbstractListModel):
                return QColor(0,255,0,50)
             else:
                 return QColor(0,0,255,50)
-        # return QVariant (0)
+        if role==Qt.ToolTipRole:
+            return self._data[index.row()] + '\n'+self.toolTipText
         return QVariant()
+    def retranslate(self):
+        self.toolTipText = self.tr('Click to open the exchange account')
 
     def flags(self, index):
         """

@@ -22,21 +22,26 @@ class TanslucentDialog(QWidget):
     """
     无边框窗口类
     """
+    langChanged = pyqtSignal([str])
     def __init__(self):
         super(TanslucentDialog, self).__init__(None, Qt.FramelessWindowHint) # 设置为顶级窗口，无边框
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         
         self._padding = 5 # 设置边界宽度为5
         self.changeFlag = False
-        self.mouseFlag = True
+        
         self.aboutDiag = 0
+        self.langFlag = 'EN'
+        
        
         # self.initLayout() # 设置框架布局
         self.setMinimumWidth(250)
-        self.setMouseTracking(True) # 设置widget鼠标跟踪
+
         self.initDrag() # 设置鼠标跟踪判断默认值
         self.trayIcon()
-        self.mouseTrans()
+        self.initMouseTrans()
+        self.setMouseTracking(True)
+
 
     def initDrag(self):
         # 设置鼠标跟踪判断扳机默认值
@@ -47,10 +52,50 @@ class TanslucentDialog(QWidget):
 
     def initDragWidget(self,movButton,changeButton,bottomEdge,rightEdge,cornerEdge):
         self._MoveButton = movButton
+        self._MoveButton.setMouseTracking(True)
+        self._MoveButton.setCursor(Qt.SizeAllCursor)
+
+        self.a3Text1 = self.tr('Disable mouse transparent')
+        self.a3Text2 = self.tr('Enable mouse transparent')
+        self.changeButText1 = self.tr('Unlock the size and postion')
+        self.changeButText2 = self.tr('Lock the size and postion')
+        
+        self.qssStyle1='''
+            QLabel#changeButton{
+                border-image: url(./img/unlock.png);
+                border-radius: 14px;
+            } 
+            '''
+        self.qssStyle2='''
+            QLabel#changeButton{
+                border-image: url(./img/locked.png);
+                border-radius: 14px;
+            } 
+
+            '''
+            #QLabel#changeButton:hover{
+            #    border-image: url(./img/locked_hover.png);
+            #}
+
         self._ChangeButton = changeButton
+        self._ChangeButton.setMouseTracking(True)
+        self._ChangeButton.setStyleSheet(self.qssStyle2)
+        self._ChangeButton.setToolTip('Unlock')
+        self._ChangeButton.setToolTip(self.changeButText1)
+        pixmap = QPixmap('./img/key.png')
+        cursor = QCursor(pixmap)
+        self._ChangeButton.setCursor(cursor)
+
         self._BottomEdge = bottomEdge
+        self._BottomEdge.setCursor(QtCore.Qt.SizeVerCursor)
         self._RightEdge = rightEdge
+        self._RightEdge.setCursor(QtCore.Qt.SizeHorCursor)
         self._CornerEdge = cornerEdge
+        self._CornerEdge.setCursor(QtCore.Qt.SizeFDiagCursor)
+        # self.langSwitch()
+
+            
+
 
     def setRoutineAndConfigFile(self,timerRoutine,fileMan):
         self.timerRoutine = timerRoutine
@@ -89,28 +134,19 @@ class TanslucentDialog(QWidget):
         # 重写鼠标点击的事件
         if (event.button() == Qt.LeftButton) and (event.pos() in self._change_rect):
             self.changeFlag = False if self.changeFlag else True
-            qssStyle1='''
-                QLabel#changeButton{
-                    border-image: url(./img/unlock.png);
-                    border-radius: 14px;
-                } 
-                QLabel#changeButton:hover{
-                    border-image: url(./img/locked_hover.png);
-                }
-                '''
-            qssStyle2='''
-                QLabel#changeButton{
-                    border-image: url(./img/locked.png);
-                    border-radius: 14px;
-                } 
-                QLabel#changeButton:hover{
-                    border-image: url(./img/locked_hover.png);
-                }
-                '''
+
             if self.changeFlag:
-                self._ChangeButton.setStyleSheet(qssStyle1)
+                self._ChangeButton.setStyleSheet(self.qssStyle1)
+                self._ChangeButton.setToolTip(self.changeButText2)
+                pixmap = QPixmap('./img/locked_hover.png')
+                cursor = QCursor(pixmap)
+                self._ChangeButton.setCursor(cursor)
             else:
-                self._ChangeButton.setStyleSheet(qssStyle2)
+                self._ChangeButton.setStyleSheet(self.qssStyle2)
+                self._ChangeButton.setToolTip(self.changeButText1)
+                pixmap = QPixmap('./img/key.png')
+                cursor = QCursor(pixmap)
+                self._ChangeButton.setCursor(cursor)
             event.accept()
         else:
             if(self.changeFlag):
@@ -136,20 +172,10 @@ class TanslucentDialog(QWidget):
                     event.accept()
             else:
                 event.accept()
+
     def getChangeFlag(self):
         return self.changeFlag
     def mouseMoveEvent(self, QMouseEvent):
-        # 判断鼠标位置切换鼠标手势
-        if QMouseEvent.pos() in self._corner_rect:
-            self.setCursor(Qt.SizeFDiagCursor)
-        elif QMouseEvent.pos() in self._bottom_rect:
-            self.setCursor(Qt.SizeVerCursor)
-        elif QMouseEvent.pos() in self._right_rect:
-            self.setCursor(Qt.SizeHorCursor)
-        elif QMouseEvent.pos() in self._move_rect:
-            self.setCursor(Qt.SizeAllCursor)
-        else:
-            self.setCursor(Qt.ArrowCursor)
         # 当鼠标左键点击不放及满足点击区域的要求后，分别实现不同的窗口调整
         # 没有定义左方和上方相关的5个方向，主要是因为实现起来不难，但是效果很差，拖放的时候窗口闪烁，再研究研究是否有更好的实现
         if Qt.LeftButton and self._right_drag:
@@ -169,6 +195,8 @@ class TanslucentDialog(QWidget):
             # 标题栏拖放窗口位置
             self.move(QMouseEvent.globalPos() - self.move_DragPosition)
             QMouseEvent.accept()
+        QMouseEvent.accept()
+
     def mouseReleaseEvent(self, QMouseEvent):
         # 鼠标释放后，各扳机复位
         self._move_drag = False
@@ -203,12 +231,18 @@ class TanslucentDialog(QWidget):
  
         #创建托盘的右键菜单
         self.tpMenu = QMenu()
-        self.a1 = QAction(QIcon('./img/about.png'), u'关于', self) #添加一级菜单动作选项(关于程序)
+        self.a1 = QAction(QIcon('./img/about.png'), self.tr('About'), self) #添加一级菜单动作选项(关于程序)
         self.a1.triggered.connect(self.about)
-        self.a2 = QAction(QIcon('./img/exit.png'), u'退出', self) #添加一级菜单动作选项(退出程序)
+        self.a2 = QAction(QIcon('./img/exit.png'), self.tr('Exit'), self) #添加一级菜单动作选项(退出程序)
         self.a2.triggered.connect(self.quit)
-        self.a3 = QAction(QIcon('./img/check.png'), u'开启鼠标穿透', self)
+        self.a3 = QAction(QIcon('./img/check.png'), self.tr('Enable Mouse Transparent'), self)
         self.a3.triggered.connect(self.mouseTrans)
+
+        self.a4 = QAction(QIcon('./img/cn.png'), '切换到中文', self)
+        self.a4.triggered.connect(self.langSwitch)
+
+
+        self.tpMenu.addAction(self.a4)
         self.tpMenu.addAction(self.a3)
         self.tpMenu.addAction(self.a1)
         self.tpMenu.addAction(self.a2)
@@ -216,41 +250,75 @@ class TanslucentDialog(QWidget):
  
         self.ptray.show()  #显示托盘   
          
+    def langSwitch(self):
+        self.langFlag = 'CN' if self.langFlag == 'EN' else 'EN'
+        if self.langFlag == 'CN':
+            self.a4.setIcon(QIcon('./img/en.png'))
+            self.a4.setText('Switch to Endlish')
+
+        else:
+            self.a4.setIcon(QIcon('./img/cn.png'))
+            self.a4.setText('切换到中文')
+        self.langChanged[str].emit(self.langFlag)
     def aboutWebsite(self):
-        win32api.ShellExecute(0,'open','https://charleechan.github.io/','','',1)
+        win32api.ShellExecute(0,'open','https://charleechan.github.io/Github_Gitbook_Cnblogs/inlook.html','','',1)
+    
+    def reTranslate(self):
+        self.a1.setText(self.tr('About'))
+        self.a2.setText(self.tr('Exit'))
+        self.a3.setText(self.tr('Enable Mouse Transparent'))
+        if self.aboutDiag == 0:
+            self.createAboutDialog()
+        self.ui_aboutDiag.descLabel.setText(self.tr('Inlook is developed by Charleechan, employing mainly exchangelib, imaplib.'))
+        self.ui_aboutDiag.verLabel.setText(self.tr('Inlook v1.0.0.0'))
+        self.aboutDiag.setWindowTitle(self.tr('Inlook 1.0'))
+        self.a3Text1 = self.tr('Disable mouse transparent')
+        self.a3Text2 = self.tr('Enable mouse transparent')
+        self.changeButText1 = self.tr('Unlock the size and postion')
+        self.changeButText2 = self.tr('Lock the size and postion')
 
     def aboutClose(self):
         self.aboutDiag.close()
+    def createAboutDialog(self):
+        self.aboutDiag = QDialog()
+        self.ui_aboutDiag = Ui_AboutDialog()
+        self.ui_aboutDiag.setupUi(self.aboutDiag)
+        self.ui_aboutDiag.iconLabel.setStyleSheet('border-image: url(./img/tray100.png);')
+        self.ui_aboutDiag.descLabel.setText(self.tr('Inlook is developed by Charleechan, employing mainly exchangelib, imaplib.'))
+        self.ui_aboutDiag.verLabel.setText(self.tr('Inlook v1.0.0.0'))
+        self.ui_aboutDiag.webButton.clicked.connect(self.aboutWebsite)
+        self.ui_aboutDiag.closeButton.clicked.connect(self.aboutClose)
+        self.aboutDiag.setWindowTitle(self.tr('Inlook 1.0'))
+        self.aboutDiag.setWindowFlags(self.aboutDiag.windowFlags() | Qt.WindowStaysOnTopHint& (~Qt.WindowMinMaxButtonsHint))
+
     def about(self):
         if self.aboutDiag == 0:
-            self.aboutDiag = QDialog()
-            ui_aboutDiag = Ui_AboutDialog()
-            ui_aboutDiag.setupUi(self.aboutDiag)
-            ui_aboutDiag.iconLabel.setStyleSheet('border-image: url(./img/tray100.png);')
-            ui_aboutDiag.descLabel.setText('Inlook is developed by Charleechan, employing mainly exchangelib, imaplib.')
-            ui_aboutDiag.verLabel.setText('Inlook v1.0.0.0')
-            ui_aboutDiag.webButton.clicked.connect(self.aboutWebsite)
-            ui_aboutDiag.closeButton.clicked.connect(self.aboutClose)
-            self.aboutDiag.setWindowTitle('Inlook 1.0')
-            self.aboutDiag.setWindowFlags(self.aboutDiag.windowFlags() | Qt.WindowStaysOnTopHint& (~Qt.WindowMinMaxButtonsHint))
-        
+            self.createAboutDialog()
         self.aboutDiag.setAttribute(Qt.WA_TranslucentBackground, True)
         with open("./qss/black.qss",'r') as f:
             style=f.read()
             self.aboutDiag.setStyleSheet(style)
         self.aboutDiag.show()
-        
+    
+    def initMouseTrans(self):
+        self.mouseFlag = False
+        self.a3.setIcon(QIcon('./img/check.png'))
+        self.a3.setText('Enable mouse transparent')
+        # self.setAttribute(Qt.WA_TransparentForMouseEvents,False)
+        win32gui.SetWindowLong(self.winId(),win32con.GWL_EXSTYLE,win32gui.GetWindowLong(self.winId(),win32con.GWL_EXSTYLE)&(~win32con.WS_EX_TRANSPARENT)&(~win32con.WS_EX_LAYERED));
+
+
     def mouseTrans(self):
         self.mouseFlag = False if self.mouseFlag else True
         if(self.mouseFlag):
             #设置鼠标穿透
             self.a3.setIcon(QIcon('./img/uncheck.png'))
-            self.a3.setText('关闭鼠标穿透')
+            self.a3.setText(self.a3Text1)
             # self.setAttribute(Qt.WA_TransparentForMouseEvents,True)
             win32gui.SetWindowLong(self.winId(),win32con.GWL_EXSTYLE,win32gui.GetWindowLong(self.winId(),win32con.GWL_EXSTYLE)|win32con.WS_EX_TRANSPARENT|win32con.WS_EX_LAYERED);
         else:
             self.a3.setIcon(QIcon('./img/check.png'))
-            self.a3.setText('开启鼠标穿透')
+            self.a3.setText(self.a3Text2)
             # self.setAttribute(Qt.WA_TransparentForMouseEvents,False)
             win32gui.SetWindowLong(self.winId(),win32con.GWL_EXSTYLE,win32gui.GetWindowLong(self.winId(),win32con.GWL_EXSTYLE)&(~win32con.WS_EX_TRANSPARENT)&(~win32con.WS_EX_LAYERED));
 

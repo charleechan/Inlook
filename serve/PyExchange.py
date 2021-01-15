@@ -17,9 +17,13 @@ class ExchAccount():
         self.config = Configuration(server=self.host, credentials=self.credentials)
 
     def login(self):
-        self.account = Account(primary_smtp_address=self.username, config=self.config,
-                        autodiscover=False, access_type=DELEGATE)
-        return 'OK'
+
+        returnStr = 'Ok'
+        try:
+            self.account = Account(primary_smtp_address=self.username, config=self.config,autodiscover=False, access_type=DELEGATE)
+        except Exception as e:
+            returnStr = 'ERROR:{}'.format(e)
+        return returnStr
 
     def Update(self):
         localTimeZone = EWSTimeZone.localzone()
@@ -85,7 +89,7 @@ class ExchAccount():
         item.save()
 def main():
 
-    exchAcc = ExchAccount('eas.outlook.com','xxxxxx@outlook.com','xxxxxxxxx')
+    exchAcc = ExchAccount('eas.outlook.com','******@outlook.com','********')
     exchAcc.login()
     localTimeZone = EWSTimeZone.localzone()
     nowDateTime = EWSDateTime.now(tz=localTimeZone)

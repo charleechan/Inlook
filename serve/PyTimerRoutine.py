@@ -60,6 +60,7 @@ class PyTimerRoutine(object):
         self.dpi = dpi
 
         self.queto = False
+        self.lang = 'CN'
         
 
 
@@ -104,6 +105,7 @@ class PyTimerRoutine(object):
         
         self.mailAcc = []
         self.mailAccStatus = []
+        self.exchAccStatus = ''
 
         self.mailAccNum = len(self.unrdAccInfo)
         print(self.mailAccNum)
@@ -122,7 +124,7 @@ class PyTimerRoutine(object):
         if not self.exchAccCount ==0:
             self.exchAccount=ExchAccount(self.exchAccInfo[0][0],self.exchAccInfo[0][1],self.exchAccInfo[0][2])
             try:
-                retStatus = self.exchAccount.login()
+                self.exchAccStatus = self.exchAccount.login()
             except socket.error as e:
                 self.toastDialog.toastLabel('Exchange Account Login ERROR!',2000)
 
@@ -138,8 +140,8 @@ class PyTimerRoutine(object):
         self.unrdAutoUpdateTimerStart()
         
     def accBatchLogout(self):
-        self.unrdAutoUpdateTimerStop()
         if not  self.mailAccNum == 0:
+            self.unrdAutoUpdateTimerStop()
             for i in range(self.mailAccNum):
                 try:
                     retStatus =  self.mailAcc[i].logout()
@@ -155,8 +157,12 @@ class PyTimerRoutine(object):
                 url = 'http://open.iciba.com/dsapi/'
                 r = requests.get(url)
                 obj = json.loads(r.text)
-                self.ui_inlook.dayQuetoLabel.setText(obj['content'])
-                self.ui_inlook.dayQuetoLabel.setToolTip(obj['note'])
+                if self.lang == 'CN':
+                    self.ui_inlook.dayQuetoLabel.setText(obj['content'])
+                    self.ui_inlook.dayQuetoLabel.setToolTip(obj['note'])
+                elif self.lang == 'EN':
+                    self.ui_inlook.dayQuetoLabel.setText(obj['note'])
+                    self.ui_inlook.dayQuetoLabel.setToolTip(obj['content'])
                 self.queto = True
             if not  self.mailAccNum == 0:
                 if(not self.mailAccNum== self.unrdModel.rowCount()):
@@ -169,17 +175,23 @@ class PyTimerRoutine(object):
                     alias = self.unrdAccInfo[i][4]
                     index = self.unrdModel.index(i)
                     try:
-                        curUnrdNum = self.mailAcc[i].Update()
+                        # print('mail {}"s state: {}'.format(i,self.mailAccStatus[i]))
+                        if self.mailAccStatus[i]=='OK':
+                            curUnrdNum = self.mailAcc[i].Update()
+                        else:
+                            curUnrdNum = -1
                     except socket.error as e:
                         self.toastDialog.toastLabel('Mail Account Connect ERROR!',2000)
-
-                    newData = ['{} has {} unread mails.'.format(alias,curUnrdNum),str(curUnrdNum),alias,self.unrdAccInfo[i][3]]
+                    if not curUnrdNum == -1:
+                        newData = ['{} has {} unread mails.'.format(alias,curUnrdNum),str(curUnrdNum),alias,self.unrdAccInfo[i][3]]
+                    else:
+                        newData = ['Network Error',str(-1),alias,self.unrdAccInfo[i][3]]
                     if(curUnrdNum > self.urndNum[i]):
                         self.listDialog.ptray.showMessage('Inlook inform you','your {} mailbox has {} unread mails.'.format(alias,curUnrdNum), QSystemTrayIcon.Information)
                     self.urndNum[i] = curUnrdNum
                     self.unrdModel.setData(index,newData)
             exchAccCount = len(self.exchAccInfo)
-            if not self.exchAccCount ==0:
+            if (not self.exchAccCount ==0) and (self.exchAccStatus == 'Ok'):
                 alias = self.exchAccInfo[0][4]
                 
                 # print('{} login {}'.format(alias,retStatus))

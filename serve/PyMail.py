@@ -9,8 +9,11 @@ class MailAccount():
     # 163 gmail requires uploading client ID information
     imaplib.Commands['ID'] = ('AUTH')
     self.authArgs = ("name","rmemailchecker","contact","charleechan@163.com","version","1.0.0","vendor","charleechan")
-    self.con = imaplib.IMAP4_SSL(self.host)
-    self.toastDialog = ToastDialog()
+
+    try:
+      self.con = imaplib.IMAP4_SSL(self.host)
+    except Exception as e:
+      print('ERROR:{}'.format(e))
 
   def login(self):
     try:
@@ -18,7 +21,7 @@ class MailAccount():
       typ, dat = self.con._simple_command('ID', '("' + '" "'.join(self.authArgs) + '")')
       returnStr = '{}'.format(status[0])
     except Exception as e:
-      self.toastDialog.toastLabel('ERROR:{}'.format(e),5000)
+      print('ERROR:{}'.format(e))
       returnStr = 'ERROR:{}'.format(e)
     
     return returnStr

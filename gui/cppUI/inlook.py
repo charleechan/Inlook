@@ -170,4 +170,3 @@ class Ui_InLook(object):
         self.statusLabel.setText(_translate("InLook", "Tips:"))
         self.dayQuetoLabel.setText(_translate("InLook", "Good good study, day day up!"))
         self.addAgndButton.setText(_translate("InLook", "Add Agenda"))
-        self.changeButton.setToolTip(_translate("InLook", "Unlock/Lock to move/change."))

@@ -18,6 +18,7 @@ class UnrdListModel(QAbstractListModel):
         self.unrdNum = []
         self.alias=[]
         self.websiteList = []
+        self.tooltipText = 'click to open the email'
 
     def rowCount(self, parent=QModelIndex()):
         """
@@ -48,7 +49,11 @@ class UnrdListModel(QAbstractListModel):
                 return QColor(255,255,255)
             else:
                 return QColor(0,0,0)
+        if role==Qt.ToolTipRole:
+            return self._data[index.row()] + '\n' + self.tooltipText
         return QVariant()
+    def retranslate(self):
+        self.tooltipText = self.tr('Click to open the email')
 
     def flags(self, index):
         """
@@ -113,7 +118,6 @@ class UnrdDelegate(QStyledItemDelegate):
         button = QPushButton(parent)
         rect = option.rect
         button.resize(rect.w,28)
-        button.setToolTip('Click to open the mail')
         return button
     def setEditorData(self,editor,index):
         """

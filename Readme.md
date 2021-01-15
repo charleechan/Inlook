@@ -16,11 +16,16 @@ Inlook is developed to visually remind users of unread mail and schedule on the 
 
 ## Change log
 * 2020.12.29 Initial release
+* 2021.01.15 Add support for Chinese, fix some bugs.
 
 ## Contact
-[charleechan@163.com](charleechan@163.com)
-[charleechan@outlook.com](charleechan@outlook.com)
+
 
 ## Declaration of interest
 
-[GNU General Public License v3.0](https://github.com/charleechan/Inlook/blob/main/LICENSE)
+[GNU General Public License v3.0]
+
+## Usage
+
+* Run at startup: Create a shortcut of **start.bat** and move it into folder `C:\Users\[username]\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`.
+* Change the language whenever you want in **Tray Menu**.

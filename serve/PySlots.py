@@ -20,12 +20,17 @@ class PySlots(object):
         self.listDialog = listDialog
         self.loginDialog = loginDialog
         self.addAgendaDialog = addAgendaDialog
+
+        self.trans = QTranslator() #实例翻译者
+    def initModel(self,unrdModel,exchModel):
+        self.unrdModel = unrdModel
+        self.exchModel = exchModel
     def lgnPgSubmit(self):
         """
         
         """
         accTypeInput = self.ui_loginpage.lgnPgAccSelect.currentIndex()
-        print('accTypeInput',accTypeInput)
+        # print('accTypeInput',accTypeInput)
         usernameInput = self.ui_loginpage.lgnPgUsernameInput.text()
         serverInput = self.ui_loginpage.lgnPgServerInput.text()
         passwordInput = self.ui_loginpage.lgnPgPasswordInput.text()
@@ -37,7 +42,7 @@ class PySlots(object):
             if(mailAccount.login()=='OK'):
                 self.fileMan.UpdateConfigFile('mail',serverInput,usernameInput,passwordInput,website,alias)
                 # self.ui.stackWgt.setCurrentIndex(1)
-                self.timerRoutine.toastLabel('Email Account Login Success.',3000)
+                self.timerRoutine.toastDialog.toastLabel('Email Account Login Success.',3000)
                 self.timerRoutine.accBatchLogout()
                 self.timerRoutine.accBatchLogin()
                 self.loginDialog.close()
@@ -47,19 +52,19 @@ class PySlots(object):
                 self.timerRoutine.timer2.start()
 
             else:
-                self.timerRoutine.toastLabel('Email Account Login Failed, Please check your info.',3000)
+                self.timerRoutine.toastDialog.toastLabel('Email Account Login Failed, Please check your info.',3000)
         else:
             exchAccount = ExchAccount(serverInput,usernameInput,passwordInput)
             if(exchAccount.login()=='OK'):
                 self.fileMan.UpdateConfigFile('exchange',serverInput,usernameInput,passwordInput,website,alias)
                 # self.ui.stackWgt.setCurrentIndex(1)
-                self.timerRoutine.toastLabel('Exchange Account Login Success.',3000)
+                self.timerRoutine.toastDialog.toastLabel('Exchange Account Login Success.',3000)
                 self.loginDialog.close()
                 self.listDialog.show()
                 self.timerRoutine.unrdAutoUpdateTimerStart()
                 self.timerRoutine.timer2.start()
             else:
-                self.timerRoutine.toastLabel('Exchange Login Failed, Please check your info.',3000)
+                self.timerRoutine.toastDialog.toastLabel('Exchange Login Failed, Please check your info.',3000)
                 
     def lgnPgCancel(self):
         """
@@ -72,12 +77,12 @@ class PySlots(object):
         if(not acc[0]):
             self.listDialog.close()
             self.loginDialog.show()
-            self.timerRoutine.toastLabel('Clear success.',2000)
+            self.timerRoutine.toastDialog.toastLabel('Clear success.',2000)
         else:
 
             self.loginDialog.close()
             self.listDialog.show()
-            self.timerRoutine.toastLabel('Cancel success.',2000)
+            self.timerRoutine.toastDialog.toastLabel('Cancel success.',2000)
     
     def addMailAcc(self):
         """
@@ -152,4 +157,31 @@ class PySlots(object):
         self.addAgendaDialog.close()
         self.listDialog.show()
         self.timerRoutine.unrdAutoUpdateTimerStart()
+        self.timerRoutine.timer2.start()
+
+    def langChangedSlot(self,lang):
+        self.timerRoutine.queto = False
+        self.timerRoutine.lang = lang
+
+        if lang =='CN':
+            self.trans.load("./lang/zh_CN") #读取qm语言包
+            app = QApplication.instance()   #应用实例
+            app.installTranslator(self.trans)#将翻译者安装到实例中
+        else:
+            self.trans.load("en") #读取qm语言包
+            app = QApplication.instance()   #应用实例
+            app.installTranslator(self.trans)#将翻译者安装到实例中
+
+        self.ui_inlook.retranslateUi(self.listDialog)#翻译 ui_look 界面
+        self.ui_loginpage.retranslateUi(self.loginDialog)#翻译 loginDialog 界面
+        self.ui_addAgenda.retranslateUi(self.addAgendaDialog)#翻译 addAgendaDialog 界面
+        self.listDialog.reTranslate()
+        self.exchModel.retranslate()
+        self.unrdModel.retranslate()
+
+        if not self.timerRoutine.unrdAutoUpdateTimer==0:
+            self.timerRoutine.unrdAutoUpdateTimerStop()
+            self.timerRoutine.unrdAutoUpdate() # 立即更新
+            self.timerRoutine.unrdAutoUpdateTimerStart()
+        self.timerRoutine.timer2.stop()
         self.timerRoutine.timer2.start()

@@ -19,17 +19,17 @@ from serve.PyTimerRoutine import *
 from serve.PySlots import *
 from serve.ExchListModel import *
 from serve.UnrdListModel import *
+from serve.PyToast import *
 
 
-def connectSignalSlot(ui_inlook,ui_loginpage,ui_addAgenda,mSlots):
+def connectSignalSlot(ui_inlook,ui_loginpage,ui_addAgenda,mSlots,listDialog):
     ui_loginpage.lgnPgSubmitButton.clicked.connect(mSlots.lgnPgSubmit)
     ui_loginpage.lgnPgCancelButton.clicked.connect(mSlots.lgnPgCancel)
     ui_inlook.addMailAccButton.clicked.connect(mSlots.addMailAcc)
     ui_inlook.addAgndButton.clicked.connect(mSlots.addAgenda)
     ui_addAgenda.agndSubmitButton.clicked.connect(mSlots.addAgendaSubmit)
     ui_addAgenda.agndCancelButton.clicked.connect(mSlots.addAgendaCancel)
-
-
+    listDialog.langChanged[str].connect(mSlots.langChangedSlot)
 
 
 def main():
@@ -39,6 +39,7 @@ def main():
     """
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication(sys.argv)
+    
 
     primaryScreen = QApplication.primaryScreen()
     # screens = QApplication.screens()
@@ -69,15 +70,21 @@ def main():
     # Create a QDialog object
     listDialog = TanslucentDialog()
     listDialog.setWindowTitle('Inlook')
+
+
+
     loginDialog = QDialog()
     loginDialog.setWindowTitle('Login your Account...')
     loginDialog.setWindowFlags(loginDialog.windowFlags() | Qt.WindowMinimizeButtonHint |Qt.WindowStaysOnTopHint)
+    loginDialog.setMouseTracking(True)
     addAgendaDialog = QDialog()
     addAgendaDialog.setWindowFlags(addAgendaDialog.windowFlags() | Qt.WindowMinimizeButtonHint | Qt.WindowStaysOnTopHint)
     addAgendaDialog.setWindowTitle('Add Agenda...')
+    addAgendaDialog.setMouseTracking(True)
     # Create a UI object
     ui_inlook = Ui_InLook(lineHei,spaceHei)
     ui_loginpage = Ui_LoginPage()
+    
     ui_addAgenda = Ui_AddAgenda()
 
     
@@ -128,7 +135,8 @@ def main():
     ui_inlook.agndListView.show()
 
     mSlots = PySlots(ui_inlook,ui_loginpage,ui_addAgenda, timerRoutine,fileMan,listDialog,loginDialog,addAgendaDialog)
-    connectSignalSlot(ui_inlook,ui_loginpage,ui_addAgenda,mSlots)
+    mSlots.initModel(unrdModel,exchModel)
+    connectSignalSlot(ui_inlook,ui_loginpage,ui_addAgenda,mSlots,listDialog)
 
     with open("./qss/black.qss",'r') as f:
         style=f.read()
