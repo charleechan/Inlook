@@ -1,6 +1,6 @@
 # Inlook - Your personal assistant
 
-[中文版](https://charleechan.github.io/Github_Gitbook_Cnblogs/inlook.html)
+[中文版](https://github.com/charleechan/Inlook/blob/main/Readme_CN.md)|English version
 
 ## Introduction
 Inlook is developed to visually remind users of unread mail and schedule on the desktop. The release is distributed only on windows 10. Developers in need can freely develop versions of other platforms based on this project.
@@ -33,6 +33,7 @@ Inlook is developed to visually remind users of unread mail and schedule on the 
 
 ## Contact
 
+charleechan@163.com
 
 ## Declaration of interest
 

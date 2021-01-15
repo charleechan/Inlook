@@ -1,5 +1,7 @@
 # Inlook - Your personal assistant
 
+中文版|[English version](https://github.com/charleechan/Inlook)
+
 ## Introduction
 Inlook是为在桌面上直观地提醒用户收到未读邮件和日程安排而开发的软件。本发布版仅限Windows 10. 开发者可基于此项目自由开发其他平台的版本。
 
