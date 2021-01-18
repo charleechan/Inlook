@@ -30,6 +30,7 @@ Inlook is developed to visually remind users of unread mail and schedule on the 
 ## Change log
 * 2020.12.29 Initial release
 * 2021.01.15 Add support for Chinese, fix some bugs.
+* 2020.01.18 Fix the bug: break down when reconnect after disconnecting network.
 
 ## Contact
 

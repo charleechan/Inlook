@@ -53,6 +53,7 @@ class PyTimerRoutine(object):
         self.unrdAutoUpdateTimer = 0
         self.mailAccNum = 0
         self.agndListItem = 0
+        self.lastNetStatus = False
 
         self.lineHei     =lineHei
         self.spaceHei    =spaceHei
@@ -90,7 +91,7 @@ class PyTimerRoutine(object):
         else:
             tmpStr = '{:.1f}KB/s'.format(tmp)
         # print(tmp,cpu_p,mem_p)
-        self.labelObj.setText('{}: {} RAM: {}%'.format(chr(0x2193),tmpStr,mem_p))
+        self.labelObj.setText('{}: {}  RAM: {}%'.format(chr(0x2193),tmpStr,mem_p))
 
     def unrdAutoUpdateTimerStart(self):
         if not self.unrdAutoUpdateTimer:
@@ -164,6 +165,9 @@ class PyTimerRoutine(object):
                     self.ui_inlook.dayQuetoLabel.setText(obj['note'])
                     self.ui_inlook.dayQuetoLabel.setToolTip(obj['content'])
                 self.queto = True
+            if not self.lastNetStatus:
+                self.accBatchLogin()
+                self.lastNetStatus = True
             if not  self.mailAccNum == 0:
                 if(not self.mailAccNum== self.unrdModel.rowCount()):
                     # clear all data
@@ -174,6 +178,7 @@ class PyTimerRoutine(object):
                 for i in range(self.mailAccNum):
                     alias = self.unrdAccInfo[i][4]
                     index = self.unrdModel.index(i)
+                    curUnrdNum = 0
                     try:
                         # print('mail {}"s state: {}'.format(i,self.mailAccStatus[i]))
                         if self.mailAccStatus[i]=='OK':
@@ -182,6 +187,7 @@ class PyTimerRoutine(object):
                             curUnrdNum = -1
                     except socket.error as e:
                         self.toastDialog.toastLabel('Mail Account Connect ERROR!',2000)
+                        curUnrdNum = -1
                     if not curUnrdNum == -1:
                         newData = ['{} has {} unread mails.'.format(alias,curUnrdNum),str(curUnrdNum),alias,self.unrdAccInfo[i][3]]
                     else:
@@ -248,6 +254,7 @@ class PyTimerRoutine(object):
             index = self.exchModel.index(0)
             newData = ['Please connect the network.',str(1),'','ms-settings:network-ethernet']
             self.unrdModel.setData(index,newData)
+            self.lastNetStatus = False
 
     def unrdAutoUpdate(self):
         '''

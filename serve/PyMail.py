@@ -29,10 +29,14 @@ class MailAccount():
   def Update(self):
 
     # print(con._untagged_response(typ, dat, 'ID'))
-    
-    self.con.select('INBOX', True)
-    _, msgnums = self.con.search(None, '(UNSEEN)')
-    return len(msgnums[0].split())
+    unrdNums = 0
+    try:
+      self.con.select('INBOX', True)
+      _, msgnums = self.con.search(None, '(UNSEEN)')
+      unrdNums = len(msgnums[0].split())
+    except Exception as e:
+      print('ERROR:{}'.format(e))
+    return unrdNums
 
   def logout(self):
     self.con.close()
