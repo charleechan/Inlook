@@ -53,7 +53,6 @@ class PyTimerRoutine(object):
         self.unrdAutoUpdateTimer = 0
         self.mailAccNum = 0
         self.agndListItem = 0
-        self.lastNetStatus = False
 
         self.lineHei     =lineHei
         self.spaceHei    =spaceHei
@@ -103,54 +102,9 @@ class PyTimerRoutine(object):
 
     def accBatchLogin(self):
         self.unrdAccInfo,self.exchAccInfo = PyFileMan().readConfigFile()
-        
-        self.mailAcc = []
-        self.mailAccStatus = []
-        self.exchAccStatus = ''
-
-        self.mailAccNum = len(self.unrdAccInfo)
-        print(self.mailAccNum)
-        if not  self.mailAccNum == 0:
-            for i in range(self.mailAccNum):
-                mailAccI = MailAccount(self.unrdAccInfo[i][0],self.unrdAccInfo[i][1],self.unrdAccInfo[i][2])
-                self.mailAcc.append(mailAccI)
-                try:
-                    retStatus =  self.mailAcc[i].login()
-                    self.mailAccStatus.append(retStatus)
-                except socket.error as e:
-                    self.toastDialog.toastLabel('Mail Account Login ERROR!',2000)
-            
-            
-        self.exchAccCount = len(self.exchAccInfo)
-        if not self.exchAccCount ==0:
-            self.exchAccount=ExchAccount(self.exchAccInfo[0][0],self.exchAccInfo[0][1],self.exchAccInfo[0][2])
-            try:
-                self.exchAccStatus = self.exchAccount.login()
-            except socket.error as e:
-                self.toastDialog.toastLabel('Exchange Account Login ERROR!',2000)
-
-        self.unrdListViewHeight = self.mailAccNum*(self.lineHei + 2* self.viewSpacHei)
-        self.ui_inlook.unrdListView.setMaximumHeight(self.unrdListViewHeight)
-        self.ui_inlook.unrdListView.resize(self.ui_inlook.unrdListView.width(),self.unrdListViewHeight)
-
-        self.listDialog.resize(self.listDialog.width(), self.unrdListViewHeight + self.ui_inlook.agndListView.height()+ 225)
-        self.listDialog.selfFlush()
-
         self.unrdAutoUpdate()
-
         self.unrdAutoUpdateTimerStart()
-        
-    def accBatchLogout(self):
-        if not  self.mailAccNum == 0:
-            self.unrdAutoUpdateTimerStop()
-            for i in range(self.mailAccNum):
-                try:
-                    retStatus =  self.mailAcc[i].logout()
-                    self.mailAccStatus.append(retStatus)
-                except socket.error as e:
-                    self.toastDialog.toastLabel('Mail Account Logout ERROR!',2000)
-        
-        # self.exchAccount.logout()
+
 
     def pingBack(self,netStatus):
         if netStatus:
@@ -165,9 +119,20 @@ class PyTimerRoutine(object):
                     self.ui_inlook.dayQuetoLabel.setText(obj['note'])
                     self.ui_inlook.dayQuetoLabel.setToolTip(obj['content'])
                 self.queto = True
-            if not self.lastNetStatus:
-                self.accBatchLogin()
-                self.lastNetStatus = True
+
+            self.mailAcc = []
+            self.exchAccStatus = ''
+            self.mailAccNum = len(self.unrdAccInfo)
+
+            self.unrdListViewHeight = self.mailAccNum*(self.lineHei + 2* self.viewSpacHei)
+            self.ui_inlook.unrdListView.setMaximumHeight(self.unrdListViewHeight)
+            self.ui_inlook.unrdListView.resize(self.ui_inlook.unrdListView.width(),self.unrdListViewHeight)
+
+            self.listDialog.resize(self.listDialog.width(), self.unrdListViewHeight + self.ui_inlook.agndListView.height()+ 225)
+            self.listDialog.selfFlush()
+
+            print(self.mailAccNum)
+
             if not  self.mailAccNum == 0:
                 if(not self.mailAccNum== self.unrdModel.rowCount()):
                     # clear all data
@@ -176,17 +141,17 @@ class PyTimerRoutine(object):
                     self.urndNum =[0 for x in range(0,self.mailAccNum)] # 每个账户对应的未读数目
 
                 for i in range(self.mailAccNum):
+                    mailAccI = MailAccount(self.unrdAccInfo[i][0],self.unrdAccInfo[i][1],self.unrdAccInfo[i][2])
+                    self.mailAcc.append(mailAccI)
+
                     alias = self.unrdAccInfo[i][4]
                     index = self.unrdModel.index(i)
                     curUnrdNum = 0
                     try:
-                        # print('mail {}"s state: {}'.format(i,self.mailAccStatus[i]))
-                        if self.mailAccStatus[i]=='OK':
-                            curUnrdNum = self.mailAcc[i].Update()
-                        else:
-                            curUnrdNum = -1
+                        curUnrdNum = self.mailAcc[i].update()
                     except socket.error as e:
                         self.toastDialog.toastLabel('Mail Account Connect ERROR!',2000)
+                        print('Error: {}'.format(e))
                         curUnrdNum = -1
                     if not curUnrdNum == -1:
                         newData = ['{} has {} unread mails.'.format(alias,curUnrdNum),str(curUnrdNum),alias,self.unrdAccInfo[i][3]]
@@ -196,7 +161,17 @@ class PyTimerRoutine(object):
                         self.listDialog.ptray.showMessage('Inlook inform you','your {} mailbox has {} unread mails.'.format(alias,curUnrdNum), QSystemTrayIcon.Information)
                     self.urndNum[i] = curUnrdNum
                     self.unrdModel.setData(index,newData)
-            exchAccCount = len(self.exchAccInfo)
+
+                    
+            self.exchAccCount = len(self.exchAccInfo)
+            if not self.exchAccCount ==0:
+                self.exchAccount=ExchAccount(self.exchAccInfo[0][0],self.exchAccInfo[0][1],self.exchAccInfo[0][2])
+                try:
+                    self.exchAccStatus = self.exchAccount.login()
+                except socket.error as e:
+                    self.toastDialog.toastLabel('Exchange Account Login ERROR!',2000)
+                    print('Error: {}'.format(e))
+
             if (not self.exchAccCount ==0) and (self.exchAccStatus == 'Ok'):
                 alias = self.exchAccInfo[0][4]
                 
@@ -235,7 +210,6 @@ class PyTimerRoutine(object):
                     self.listDialog.selfFlush()
 
                 self.agndListItem = itemNum
-
         else:
             # 清空所有行
             self.unrdModel.removeRows(0,self.unrdModel.rowCount()) 
@@ -254,7 +228,7 @@ class PyTimerRoutine(object):
             index = self.exchModel.index(0)
             newData = ['Please connect the network.',str(1),'','ms-settings:network-ethernet']
             self.unrdModel.setData(index,newData)
-            self.lastNetStatus = False
+
 
     def unrdAutoUpdate(self):
         '''

@@ -14,6 +14,7 @@ Inlook是为在桌面上直观地提醒用户收到未读邮件和日程安排�
 ## Release
 
 * [Click Me To Download The Release Version](https://pan.baidu.com/s/1gzzFjWwLh1hMKob9biTz0g) (a1b2)
+* 1.0.0.2 Fix some bugs.
 * 1.0.0.1 Add support for Chinese, fix some bugs.
 * 1.0.0.0 Initial release
 
@@ -25,12 +26,13 @@ Inlook是为在桌面上直观地提醒用户收到未读邮件和日程安排�
 * 窗口放在桌面最底层,不影响游戏和工作.
 * 网速和占用RAM监控.
 * 支持鼠标穿透,提高工作效率.
+* 智能缩放,根据邮箱数目和日程项数自动规划窗口大小.
 * **支持中文界面!**
 
 ## Change log
 * 2020.12.29 初始版本发布
-* 2020.01.15 增加对中文界面的支持.
-* 2020.01.18 修改了部分bug,当网络断开后重新连接会导致崩溃(络断开后服务器会自动关闭连接,需要重新登录邮箱).
+* 2021.01.15 增加对中文界面的支持.
+* 2021.01.19 增加用户登录账户验证功能, 修复Bug: 第二次网络中断后连接造成崩溃
 
 ## Declaration of interest
 

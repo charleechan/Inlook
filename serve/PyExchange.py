@@ -22,7 +22,8 @@ class ExchAccount():
         try:
             self.account = Account(primary_smtp_address=self.username, config=self.config,autodiscover=False, access_type=DELEGATE)
         except Exception as e:
-            returnStr = 'ERROR:{}'.format(e)
+            returnStr = 'ERROR:{}'.format(e.decode('utf-8'))
+            
         return returnStr
 
     def Update(self):

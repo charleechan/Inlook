@@ -39,20 +39,27 @@ class PySlots(object):
 
         if( not accTypeInput):
             mailAccount = MailAccount(serverInput,usernameInput,passwordInput)
-            if(mailAccount.login()=='OK'):
+            retMsg = mailAccount.update(True)
+            if(retMsg =='OK'):
                 self.fileMan.UpdateConfigFile('mail',serverInput,usernameInput,passwordInput,website,alias)
                 # self.ui.stackWgt.setCurrentIndex(1)
                 self.timerRoutine.toastDialog.toastLabel('Email Account Login Success.',3000)
-                self.timerRoutine.accBatchLogout()
+
                 self.timerRoutine.accBatchLogin()
                 self.loginDialog.close()
                 self.listDialog.show()
 
                 self.timerRoutine.unrdAutoUpdateTimerStart()
                 self.timerRoutine.timer2.start()
-
-            else:
-                self.timerRoutine.toastDialog.toastLabel('Email Account Login Failed, Please check your info.',3000)
+            elif (retMsg =='SERVER'):
+                self.ui_loginpage.lgnPgServerInput.setText('')
+                self.timerRoutine.toastDialog.toastLabel('SERVER error, please check it!',3000)
+            elif (retMsg =='ACCOUNT'):
+                self.ui_loginpage.lgnPgUsernameInput.setText('')
+                self.timerRoutine.toastDialog.toastLabel('USERNAME error, please check it!',3000)
+            elif (retMsg =='PASSWORD'):
+                self.ui_loginpage.lgnPgPasswordInput.setText('')
+                self.timerRoutine.toastDialog.toastLabel('PASSWORD error, please check it!',3000)
         else:
             exchAccount = ExchAccount(serverInput,usernameInput,passwordInput)
             if(exchAccount.login()=='OK'):

@@ -14,6 +14,7 @@ Inlook is developed to visually remind users of unread mail and schedule on the 
 ## Release
 
 * [Click Me To Download The Release Version](https://pan.baidu.com/s/1gzzFjWwLh1hMKob9biTz0g) (a1b2)
+* 1.0.0.2 Fix some bugs.
 * 1.0.0.1 Add support for Chinese, fix some bugs.
 * 1.0.0.0 Initial release
 
@@ -26,12 +27,13 @@ Inlook is developed to visually remind users of unread mail and schedule on the 
 * The window is placed at the bottom of other windows, which does not affect the work.
 * Network speed and RAM occupancy monitor.
 * Support mouse penetration, so you can work at ease.
+* Zoom the window's size according to the number of accounts and agenda.
+* Support Chinese.
 
 ## Change log
 * 2020.12.29 Initial release
 * 2021.01.15 Add support for Chinese, fix some bugs.
-* 2020.01.18 Fix the bug: break down when reconnect after disconnecting network.
-
+* 2021.01.19 Fix some bugs.
 ## Contact
 
 charleechan@163.com
