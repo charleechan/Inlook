@@ -102,10 +102,18 @@ class PyTimerRoutine(object):
 
     def accBatchLogin(self):
         self.unrdAccInfo,self.exchAccInfo = PyFileMan().readConfigFile()
+
+
+        self.mailAccNum = len(self.unrdAccInfo)
+        self.unrdListViewHeight = self.mailAccNum*(self.lineHei + 2* self.viewSpacHei)
+        self.ui_inlook.unrdListView.setMaximumHeight(self.unrdListViewHeight)
+        self.ui_inlook.unrdListView.resize(self.ui_inlook.unrdListView.width(),self.unrdListViewHeight)
+        self.listDialog.resize(self.listDialog.width(), self.unrdListViewHeight + self.ui_inlook.agndListView.height()+ 225)
+        self.listDialog.selfFlush()
+
         self.unrdAutoUpdate()
         self.unrdAutoUpdateTimerStart()
-
-
+        
     def pingBack(self,netStatus):
         if netStatus:
             if not self.queto:
@@ -122,14 +130,7 @@ class PyTimerRoutine(object):
 
             self.mailAcc = []
             self.exchAccStatus = ''
-            self.mailAccNum = len(self.unrdAccInfo)
 
-            self.unrdListViewHeight = self.mailAccNum*(self.lineHei + 2* self.viewSpacHei)
-            self.ui_inlook.unrdListView.setMaximumHeight(self.unrdListViewHeight)
-            self.ui_inlook.unrdListView.resize(self.ui_inlook.unrdListView.width(),self.unrdListViewHeight)
-
-            self.listDialog.resize(self.listDialog.width(), self.unrdListViewHeight + self.ui_inlook.agndListView.height()+ 225)
-            self.listDialog.selfFlush()
 
             print(self.mailAccNum)
 
