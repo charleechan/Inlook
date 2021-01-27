@@ -116,17 +116,38 @@ class PyTimerRoutine(object):
         
     def pingBack(self,netStatus):
         if netStatus:
-            if not self.queto:
-                url = 'http://open.iciba.com/dsapi/'
-                r = requests.get(url)
-                obj = json.loads(r.text)
+            if not self.queto:                    
                 if self.lang == 'CN':
+                    self.token = PyFileMan().getConfigQueto()
+                    if (self.token=='-1'):
+                        url = "https://v2.jinrishici.com/token"
+                        r = requests.get(url)
+                        obj = json.loads(r.text)
+                        # print(obj['data'])
+                        PyFileMan().setConfigQueto(obj['data'])
+                        self.token = (obj['data'])
+
+                    url = "https://v2.jinrishici.com/sentence"
+                    headers = {'X-User-Token':self.token}
+                    r = requests.get(url, headers=headers)
+                    obj = json.loads(r.text)
+                    text = obj['data']['content']+"\n"+ \
+                        "——["+obj['data']['origin']['dynasty']+"]·"+obj['data']['origin']['author']+"《"+\
+                            obj['data']['origin']['title']+"》"
+                    self.ui_inlook.dayQuetoLabel.setText(text)
+                    tooltip = "Your IP:"+obj['ipAddress']+"\n"
+                    content = obj['data']['origin']['content']
+                    for item in content:
+                        tooltip = tooltip + item
+                    self.ui_inlook.dayQuetoLabel.setToolTip(tooltip)
+                elif self.lang == 'EN':
+                    url = 'http://open.iciba.com/dsapi/'
+                    r = requests.get(url)
+                    obj = json.loads(r.text)
                     self.ui_inlook.dayQuetoLabel.setText(obj['content'])
                     self.ui_inlook.dayQuetoLabel.setToolTip(obj['note'])
-                elif self.lang == 'EN':
-                    self.ui_inlook.dayQuetoLabel.setText(obj['note'])
-                    self.ui_inlook.dayQuetoLabel.setToolTip(obj['content'])
                 self.queto = True
+
 
             self.mailAcc = []
             self.exchAccStatus = ''

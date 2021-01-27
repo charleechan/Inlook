@@ -151,6 +151,7 @@ def main():
     height = pos[3]
     listDialog.resize(width,height)
     listDialog.move(posX,posY)
+    listDialog.langSwitch()
 
     if ret[0] or ret[1]:
         # ui.stackWgt.setCurrentIndex(1)

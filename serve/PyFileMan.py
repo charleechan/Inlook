@@ -20,6 +20,7 @@ class PyFileMan(object):
             self.config['Position']['y'] = '400'
             self.config['Position']['width'] = '360'
             self.config['Position']['height'] = '400'
+            self.config['Token'] = ''
             
         returnValue = []
         items = ['mail','exchange']
@@ -82,7 +83,22 @@ class PyFileMan(object):
         width = int(self.config['Position']['width'])
         height = int(self.config['Position']['height'])
         return x,y,width,height
-        
+
+    def getConfigQueto(self):
+        self.config = ConfigObj("./data/config.ini",encoding='UTF8')
+        keys = self.config.keys()
+
+        if 'Token' in keys:
+            return self.config['Token']
+            print("Found token!")
+        else:
+            print("No token")
+            return '-1'
+    def setConfigQueto(self,token):
+        self.config = ConfigObj("./data/config.ini",encoding='UTF8')
+        self.config['Token'] = token
+        self.config.write()
+
     def setConfigPos(self,x,y,width,height):
         self.config = ConfigObj("./data/config.ini",encoding='UTF8')
         self.config['Position']['x'] = x

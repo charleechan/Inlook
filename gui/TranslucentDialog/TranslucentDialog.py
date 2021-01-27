@@ -42,7 +42,6 @@ class TanslucentDialog(QWidget):
         self.initMouseTrans()
         self.setMouseTracking(True)
 
-
     def initDrag(self):
         # 设置鼠标跟踪判断扳机默认值
         self._move_drag = False
